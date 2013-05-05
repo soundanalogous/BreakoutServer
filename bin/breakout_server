@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: com.breakoutjs.BreakoutServer
+Class-Path: ./lib/RXTXcomm.jar ./lib/WebSocket.jar
+
