@@ -20,7 +20,7 @@ OSX Build
 
 - Main Class: Select BreakoutServer.jar
 - Arguments to Main: leave empty
-- Custom Icon: Add BreakoutLogo.icns
+- Custom Icon: Add /resources/BreakoutLogo.icns
 - Use Macintosh Menu Bar (uncheck)
 - Anti-alias Text (check)
 - Anti-alias Graphics (check)
@@ -28,15 +28,15 @@ OSX Build
 
 ### Jar Bundler - Classpath and Files Tab:
 
-- Add librxtxSerial.jnilib (from Breakout/server/) to Additional Files and Resources
+- Add librxtxSerial.jnilib to Additional Files and Resources
 
 ### Jar Bundler - Properties Tab:
 
 - Type: APPL (default)
-- Version: 0.2.0
+- Version: 0.2.3
 - Signature: ???? (default)
 - Identifier: com.breakoutjs
-- Get-Info String: 0.2.0 Copyright Breakout Authors
+- Get-Info String: 0.2.3 Copyright Breakout Authors
 - Allow Mixed Localizations (check)
 - Development Region: English (default)
 - Info Dictionary Version: 6.0 (default)
@@ -55,15 +55,17 @@ Win Build
 ### 32 bit (for 32 bit version of rxtxSerial.dll)
 
 1. Download [exewrap096](http://code.google.com/p/exewrap/)
-2. Copy BreakoutServer.jar, rxtxSerial.dll (32 bit) and BreakoutLogo.ico to the exewrap096 folder.
-3. Run: exewrap.exe -g -i BreakoutLogo.ico -o "Breakout Server32.exe" -v 0.2.0.0 BreakoutServer.jar
+2. Copy /build/BreakoutServer.jar, /resources/rxtx_win_32bit/rxtxSerial.dll and 
+/resources/BreakoutLogo.ico to the exewrap096 folder.
+3. Run: exewrap.exe -g -i BreakoutLogo.ico -o "Breakout Server32.exe" -v 0.2.3.0 BreakoutServer.jar
 4. Include the 32 bit version of rxtxSerial.dll with Breakout Server32.exe when distributing the app
 
 ### 64 bit (for 64 bit version of rxtxSerial.dll)
 
 1. Download [launch4j](http://launch4j.sourceforge.net/)
-2. Copy BreakoutServer.jar, rxtxSerial.dll (64 bit) and BreakoutLogo.ico to a new folder.
-3. Copy Breakout/server/release/config.xml to same folder.
+2. Copy /build/BreakoutServer.jar, /resources/rxtx_win_64_bit/rxtxSerial.dll and 
+/resources/BreakoutLogo.ico to a new folder.
+3. Copy /resources/config.xml to same folder.
 2. Open the Launch4j executable and load config.xml
 3. Click the play button to build the exe file.
 4. Include the 64 bit version of rxtxSerial.dll with Breakout Server64.exe when distributing the app
@@ -72,6 +74,6 @@ Win Build
 Linux Build
 ---
 
-Include librxtxSerial.so and BreakoutLogo_512.png with BreakoutServer.jar
+Include librxtxSerial.so and /resources/BreakoutLogo_512.png with BreakoutServer.jar
 
 You may need to run: sudo apt-get install librxtx-java instead of copying librxtxSerial.so
