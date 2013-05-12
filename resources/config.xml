@@ -21,12 +21,12 @@
     <opt>-Djava.library.path=.</opt>
   </jre>
   <versionInfo>
-    <fileVersion>0.2.0.0</fileVersion>
-    <txtFileVersion>0.2.0</txtFileVersion>
+    <fileVersion>0.2.3.0</fileVersion>
+    <txtFileVersion>0.2.3</txtFileVersion>
     <fileDescription>Breakout Server</fileDescription>
     <copyright>Breakout Authors</copyright>
-    <productVersion>0.2.0.0</productVersion>
-    <txtProductVersion>0.2.0</txtProductVersion>
+    <productVersion>0.2.3.0</productVersion>
+    <txtProductVersion>0.2.3</txtProductVersion>
     <productName>Breakout Server</productName>
     <companyName></companyName>
     <internalName>Breakout Server</internalName>

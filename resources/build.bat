@@ -1,1 +1,1 @@
-exewrap.exe -g -i BreakoutLogo.ico -o "Breakout Server32.exe" -v 0.2.0.0 BreakoutServer.jar
+exewrap.exe -g -i BreakoutLogo.ico -o "Breakout Server32.exe" -v 0.2.3.0 BreakoutServer.jar
