@@ -52,6 +52,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	private static final String PORT_KEY = "portKey";
 	private static final String ROOT_KEY = "rootKey";
 	private static final String BOARD_KEY = "boardKey";
+	private static final String MULTI_CLIENT_KEY = "multiClientKey";
 	private static final String AUTO_CONNECT_KEY = "autoConnectKey";
 	private static final String AUTO_CONNECT_MSG = "\tTo change: Select a board from the Serial dropdown.";
 	private static final String AUTO_CONNECT_MSG_CHECKED = "\tTo change: Uncheck and select a board from the Serial dropdown.";
@@ -79,7 +80,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	private JFileChooser fc;
 	private Font messageFont;
 	
-	private boolean isMultiClientEnabled = false;
+	private boolean isMultiClientEnabled; // = false;
 	private boolean isAutoConnectEnabled;
 	
 	private static final int UPDATE_FREQ = 1000;
@@ -115,6 +116,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		netPort = prefs.getInt(PORT_KEY, DEFAULT_PORT);
 		webRoot = prefs.get(ROOT_KEY, DEFAULT_ROOT);
 		isAutoConnectEnabled = prefs.getBoolean(AUTO_CONNECT_KEY, false);
+		isMultiClientEnabled = prefs.getBoolean(MULTI_CLIENT_KEY, false);
 		autoConnectBoard = prefs.get(BOARD_KEY, "");
 		
 		Container contentPane = getContentPane();
@@ -164,7 +166,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		
 		portLabel = new JLabel("Port");
 		
-		multiClientCB = new JCheckBox("Enable Multi-Client Connections");
+		multiClientCB = new JCheckBox("Enable Multi-Client Connections", isMultiClientEnabled);
 		multiClientCB.addActionListener(this);
 		
 		autoConnectCB = new JCheckBox("", isAutoConnectEnabled);
@@ -346,6 +348,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		}
 		else if (event.getSource() == multiClientCB) {
 			isMultiClientEnabled = multiClientCB.isSelected();
+			prefs.putBoolean(MULTI_CLIENT_KEY, isMultiClientEnabled);
 		}
 		else if (event.getSource() == autoConnectCB) {
 			isAutoConnectEnabled = autoConnectCB.isSelected();
