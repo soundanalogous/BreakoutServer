@@ -42,7 +42,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	
 	private static final long serialVersionUID = -7512833780087238386L;
 	
-	private static final String buildName = "Breakout Server v0.2.4";
+	private static final String buildName = "Breakout Server v0.3.0";
 	
 	private static final int WIDTH = 480;
 	private static final int HEIGHT = 360;
