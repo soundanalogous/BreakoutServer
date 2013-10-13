@@ -22,6 +22,7 @@ import java.util.prefs.Preferences;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -41,7 +42,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	
 	private static final long serialVersionUID = -7512833780087238386L;
 	
-	private static final String buildName = "Breakout Server v0.2.3";
+	private static final String buildName = "Breakout Server v0.2.4";
 	
 	private static final int WIDTH = 480;
 	private static final int HEIGHT = 360;
@@ -50,10 +51,17 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	private static final int DEFAULT_PORT = 8887;
 	private static final String PORT_KEY = "portKey";
 	private static final String ROOT_KEY = "rootKey";
+	private static final String BOARD_KEY = "boardKey";
+	private static final String AUTO_CONNECT_KEY = "autoConnectKey";
+	private static final String AUTO_CONNECT_MSG = "\tTo change: Select a board from the Serial dropdown.";
+	private static final String AUTO_CONNECT_MSG_CHECKED = "\tTo change: Uncheck and select a board from the Serial dropdown.";
 	
 	private SerialBridge bridge;
 	private int netPort;
 	private String webRoot;
+	private String autoConnectBoard;
+	
+	private DefaultComboBoxModel serialPortModel = new DefaultComboBoxModel();
 		
 	private JComboBox serialPorts;
 	private JTextField portField;
@@ -61,13 +69,18 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	private JLabel webRootLabel;
 	private JLabel portLabel;
 	private JLabel serialLabel;
+	private JLabel autoConnectBoardLabel;
+	private JLabel boardSelectMsg;
 	private JButton connectBtn;
 	private JButton rootBtn;
 	private JTextArea loggingArea;
 	private JCheckBox multiClientCB;
+	private JCheckBox autoConnectCB;
 	private JFileChooser fc;
+	private Font messageFont;
 	
 	private boolean isMultiClientEnabled = false;
+	private boolean isAutoConnectEnabled;
 	
 	private static final int UPDATE_FREQ = 1000;
 	private ActionListener listUpdater;
@@ -100,7 +113,9 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		// get a references to the user preferences
 		prefs = Preferences.userRoot().node(this.getClass().getName());
 		netPort = prefs.getInt(PORT_KEY, DEFAULT_PORT);
-		webRoot = prefs.get(ROOT_KEY, DEFAULT_ROOT);	
+		webRoot = prefs.get(ROOT_KEY, DEFAULT_ROOT);
+		isAutoConnectEnabled = prefs.getBoolean(AUTO_CONNECT_KEY, false);
+		autoConnectBoard = prefs.get(BOARD_KEY, "");
 		
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
@@ -138,7 +153,7 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		rootBtn.addActionListener(this);
 		
 		serialLabel = new JLabel("Serial");
-		serialPorts = new JComboBox();
+		serialPorts = new JComboBox(serialPortModel);
 		createPortList();
 
 		serialPorts.addActionListener(this);
@@ -151,6 +166,15 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		
 		multiClientCB = new JCheckBox("Enable Multi-Client Connections");
 		multiClientCB.addActionListener(this);
+		
+		autoConnectCB = new JCheckBox("", isAutoConnectEnabled);
+		autoConnectCB.addActionListener(this);
+		
+		boardSelectMsg = new JLabel("");
+		messageFont = new Font(boardSelectMsg.getFont().getName(), Font.ITALIC, boardSelectMsg.getFont().getSize());
+		boardSelectMsg.setFont(messageFont);
+		
+		autoConnectBoardLabel = new JLabel("");
 		
 		connectBtn = new JButton("Connect");
 		connectBtn.addActionListener(this);
@@ -173,8 +197,12 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		settingsPane.add(webRootField);
 		settingsPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		settingsPane.add(rootBtn);
-		settingsPane.add(Box.createRigidArea(new Dimension(0, 30)));
+		settingsPane.add(Box.createRigidArea(new Dimension(0, 20)));
 		settingsPane.add(multiClientCB);
+		settingsPane.add(Box.createRigidArea(new Dimension(0, 20)));
+		settingsPane.add(autoConnectCB);
+		settingsPane.add(autoConnectBoardLabel);
+		settingsPane.add(boardSelectMsg);
 		
 		statusPane.add(portSelectionPane, BorderLayout.NORTH);
 
@@ -187,7 +215,23 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
 		
-		startPortListTimer();			
+		startPortListTimer();
+		
+		setDefaultAutoConnectMsg();
+		
+		if (isAutoConnectEnabled && autoConnectBoard.length() > 0) {
+			//autoConnectBoardLabel.setText(AUTO_CONNECT_MSG + autoConnectBoard);
+			autoConnectCB.setText("Auto Connect to " + autoConnectBoard + " on Startup");
+			boardSelectMsg.setText(AUTO_CONNECT_MSG_CHECKED);
+			
+			// attempt to auto connect
+			if (isBoardConnected(autoConnectBoard)) {
+				connectBtn.doClick();
+			} else {
+				printMessage("Auto Connect failed!\nMake sure " + autoConnectBoard + " is connected or select\nnew board and recheck the Auto Connect checkbox.");
+			}
+		}
+		
 	}
 	
 	/**
@@ -251,6 +295,19 @@ public class BreakoutServer extends JFrame implements ActionListener {
 	}
 	
 	/**
+	 * Check if a specified board is connected.
+	 * @param board The serial port name for the board.
+	 * @return true if connected, false if not connected
+	 */
+	private boolean isBoardConnected(String board) {
+		if (serialPortModel.getIndexOf(board) != -1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * Print a message to the server logging window
 	 * @param msg The message to print
 	 */
@@ -274,6 +331,8 @@ public class BreakoutServer extends JFrame implements ActionListener {
 				}
 				
 				serialPort = (String) serialPorts.getSelectedItem();
+				
+				setDefaultAutoConnectMsg();
 			}
 		}
 		else if (event.getSource() == portField) {
@@ -287,6 +346,20 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		}
 		else if (event.getSource() == multiClientCB) {
 			isMultiClientEnabled = multiClientCB.isSelected();
+		}
+		else if (event.getSource() == autoConnectCB) {
+			isAutoConnectEnabled = autoConnectCB.isSelected();
+			// store the auto connect state
+			prefs.putBoolean(AUTO_CONNECT_KEY, isAutoConnectEnabled);
+			if (isAutoConnectEnabled) {				
+				autoConnectCB.setText("Auto Connect to " + getSerialPort() + " on Startup");
+				boardSelectMsg.setText(AUTO_CONNECT_MSG_CHECKED);
+				
+				// store the serial port name for the board to auto connect
+				prefs.put(BOARD_KEY, getSerialPort());
+			} else {
+				setDefaultAutoConnectMsg();
+			}
 		}
 		else if (event.getSource() == rootBtn) {
 			System.out.println("root btn clicked");
@@ -309,17 +382,10 @@ public class BreakoutServer extends JFrame implements ActionListener {
 				// user canceled file chooser dialog
 			}
 		}
-		else if ("connect".equals(event.getActionCommand())) {			
-			// for now, if no serial port is selected upon connect
-			// get first item in list
-			// to do: store selection in a file and use the store serial port as default
-			if (serialPort == null) {
-				serialPort = (String) serialPorts.getItemAt(0);
-			}
-				
+		else if ("connect".equals(event.getActionCommand())) {							
 			bridge = new SerialBridge(netPort, this, webRoot, isMultiClientEnabled);
 			
-			bridge.begin(serialPort, 57600);
+			bridge.begin(getSerialPort(), 57600);
 						
 			connectBtn.setText("Disconnect");
 			connectBtn.setActionCommand("disconnect");
@@ -368,12 +434,27 @@ public class BreakoutServer extends JFrame implements ActionListener {
 		listUpdater = null;
 		timer = null;
 	}
+	
+	/**
+	 * If auto connect is not enabled, indicate which board will be connected if
+	 * auto connect on startup is checked.
+	 */
+	private void setDefaultAutoConnectMsg() {
+		if (!isAutoConnectEnabled) {
+			autoConnectCB.setText("Auto Connect to " + getSerialPort() + " on Startup");
+			boardSelectMsg.setText(AUTO_CONNECT_MSG);
+		}		
+	}
 		
 	/**
 	 * The name of the selected serial port
 	 * @return
 	 */
 	public String getSerialPort() {
+		if (serialPort == null) {
+			serialPort = (String) serialPorts.getItemAt(0);
+		}
+		
 		return serialPort;
 	}
 	
